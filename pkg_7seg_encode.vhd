@@ -44,10 +44,3 @@ package pkg_7seg_encode is
 
 end package pkg_7seg_encode;
 
------------------------------------------------------------------------------
--- Typically, for just constants and a type, we don't need a package body.
--- But if your tool requires it, you can add:
------------------------------------------------------------------------------
-package body pkg_7seg_encode is
-  -- (No additional definitions needed here)
-end package body pkg_7seg_encode;

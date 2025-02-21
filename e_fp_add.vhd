@@ -44,9 +44,7 @@ architecture Behavioral of e_fp_add is
     signal cycle_counter : integer range 0 to CYCLES := 0;
 
 begin
-    --------------------------------------------------------------------------
-    -- 1) STATE REGISTER
-    --------------------------------------------------------------------------
+    -- 1- STATE REGISTER
     process(clk, reset)
     begin
         if reset = '0' then
@@ -56,9 +54,7 @@ begin
         end if;
     end process;
 
-    --------------------------------------------------------------------------
-    -- 2) NEXT STATE LOGIC
-    --------------------------------------------------------------------------
+    -- 2- NEXT STATE LOGIC
     process(current_state, start, cycle_counter, rst_to_idle)
     begin
         -- Default state
@@ -73,7 +69,7 @@ begin
 					 end if;
 
             when COMPUTE =>
-                if cycle_counter = CYCLES - 1 then
+                if cycle_counter = CYCLES - 1 then -- CYCLES are intended to lenghten each process
                     next_state <= COMPUTE_DONE; -- Move to DONE after required cycles
                 else
                     next_state <= COMPUTE;
@@ -91,9 +87,7 @@ begin
         end case;
     end process;
 
-    --------------------------------------------------------------------------
-    -- 3) OUTPUT & COMPUTATION PROCESS
-    --------------------------------------------------------------------------
+    -- 3- OUTPUT & COMPUTATION PROCESS
     process(clk, reset)
     begin
         if reset = '0' then

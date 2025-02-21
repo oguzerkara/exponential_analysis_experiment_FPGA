@@ -23,11 +23,9 @@ entity e_7seg_display is
    );
 end entity e_7seg_display;
 
-architecture RTL of e_7seg_display is
+architecture behavioral of e_7seg_display is
 
-   ----------------------------------------------------------------------------
-   -- 2) Internal signals
-   ----------------------------------------------------------------------------
+   -- Internal signals
    -- Pipeline Stage 1
    signal mode_reg1    : std_logic_vector(2 downto 0) := (others => '0');
    signal data_reg1    : std_logic_vector(31 downto 0) := (others => '0');
@@ -45,20 +43,19 @@ architecture RTL of e_7seg_display is
    signal seg_array_reg  : std_logic_vector(7*6 - 1 downto 0) := (others => '1');
 
 begin
-   flt_in <= to_float(data_reg1);         -- 1) interpret bits as float32
+   flt_in <= to_float(data_reg1);         -- interpret bits as float32
 	process(clk) begin
 		if rising_edge(clk) then
 		sfix_16_16 <= to_sfixed(flt_in, 15, -16,
-										fixed_saturate,  -- or fixed_wrap
-										fixed_round      -- or fixed_truncate
+										fixed_saturate,  
+										fixed_round      
 									  );
 		end if;
 	end process;
 	fp_fixed_out(31 downto 16) <= to_slv(sfix_16_16(15 downto 0)); -- Integer part
 	fp_fixed_out(15 downto 0)  <= to_slv(sfix_16_16(-1 downto -16)); -- Fractional part
-   ----------------------------------------------------------------------------
-   -- 4) Main Synchronous Process
-   ----------------------------------------------------------------------------
+
+   -- Main Synchronous Process
    process(clk)
       -- Local variables for stage 2
       variable int_digits  : t_digit_array := (others => seg_blank);
@@ -80,15 +77,11 @@ begin
             seg_array_reg <= (others => '1');
 
          else
-            --------------------------------------------------------------
             -- Stage 1: Latch inputs for the IP
-            --------------------------------------------------------------
             mode_reg1 <= display_mode;
             data_reg1 <= display_q;
 
-            --------------------------------------------------------------
             -- Stage 2: read IP, do digit extraction if mode=111
-            --------------------------------------------------------------
             mode_reg2 <= mode_reg1;
             out_digits := (others => seg_blank);
 
@@ -109,9 +102,7 @@ begin
 
             digits_reg2 <= out_digits;
 
-            --------------------------------------------------------------
             -- Build final 6-digit output depending on mode
-            --------------------------------------------------------------
             case mode_reg2 is
 
                when "000" =>
@@ -148,9 +139,7 @@ begin
       end if; -- rising_edge
    end process;
 
-   ----------------------------------------------------------------------------
-   -- Final output to top-level
-   ----------------------------------------------------------------------------
+   -- output to top-level
    seg_out <= seg_array_reg;
 
-end architecture RTL;
+end architecture behavioral;

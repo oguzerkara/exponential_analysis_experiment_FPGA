@@ -22,9 +22,7 @@ end entity e_fp_op;
 
 architecture Structural of e_fp_op is
 
-    --------------------------------------------------------------------------
-    -- Sub-block Components
-    --------------------------------------------------------------------------
+    -- Sub-entity Components
     component e_fp_add
         generic (
             G_EXP_BITS : integer := 8;
@@ -82,9 +80,7 @@ architecture Structural of e_fp_op is
         );
     end component;
 
-    --------------------------------------------------------------------------
-    -- Signals for sub-block connections
-    --------------------------------------------------------------------------
+    -- Signals for sub-entity connections
     signal add_result               : std_logic_vector((IEEE754_FP_LEN - 1 ) downto 0);
     signal mul_result_alpha         : std_logic_vector((IEEE754_FP_LEN - 1 ) downto 0);
     signal mul_result_minusalpha    : std_logic_vector((IEEE754_FP_LEN - 1 ) downto 0);
@@ -98,15 +94,13 @@ architecture Structural of e_fp_op is
     signal mul_done_alpha           : std_logic;
     signal mul_done_minusalpha      : std_logic;   
 
-    -- We'll register the sub-block start signals
+    -- Sub-entity start signals
     signal start_add_reg, start_mul_reg, start_mulminus_reg: std_logic := '0';
     signal next_start_add, next_start_mul, next_start_mulminus: std_logic;
 	 signal to_idle_mul, to_idle_mulminus, to_idle_add	: std_logic	:= '0';
 	 signal next_to_idle_mul, next_to_idle_mulminus, next_to_idle_add : std_logic;
 
-    --------------------------------------------------------------------------
-    -- Internal top-level signals for controlling the final result
-    --------------------------------------------------------------------------
+    -- Internal higher-level entity (e_exponential_smoothing) signals for controlling the final result
     signal next_internal_in_dataa   : std_logic_vector((IEEE754_FP_LEN - 1 ) downto 0);
     signal next_internal_in_datab   : std_logic_vector((IEEE754_FP_LEN - 1 ) downto 0);
     signal next_in_add_a            : std_logic_vector((IEEE754_FP_LEN - 1 ) downto 0);
@@ -122,9 +116,7 @@ architecture Structural of e_fp_op is
 
 begin
 
-    --------------------------------------------------------------------------
-    -- 1) Sub-block Instantiations
-    --------------------------------------------------------------------------
+    -- Sub-entity Instantiations
     -- Floating-point Adder
     u_e_fp_add: e_fp_add
         generic map (
@@ -179,9 +171,7 @@ begin
             result => mul_result_minusalpha
         );
 
-    --------------------------------------------------------------------------
-    -- 2) Clocked Process: State and Registered Signals
-    --------------------------------------------------------------------------
+    -- Clocked Process: State and Registered Signals
     process(clk, reset)
     begin
         if rising_edge(clk) then
@@ -226,9 +216,7 @@ begin
         end if;
     end process;
 
-    --------------------------------------------------------------------------
-    -- 3) Combinational Process: Next-State and Output Logic
-    --------------------------------------------------------------------------
+    -- Combinational Process: Next-State and Output Logic
     process(current_state, start, mul_done_alpha, mul_done_minusalpha, add_done, in_add_a, 
             add_result, in_dataa, in_datab, mul_result_alpha, mul_result_minusalpha, in_add_b,
             internal_in_dataa, internal_in_datab, internal_done, internal_result)
@@ -254,9 +242,7 @@ begin
         next_state <= current_state;
 
         case current_state is
-            ------------------------------------------------------------------
             -- IDLE
-            ------------------------------------------------------------------
             when IDLE =>
                 -- Clear data
                 next_internal_in_dataa <= (others => '0');
@@ -274,9 +260,7 @@ begin
                     next_state <= IDLE;
                 end if;
 
-            ------------------------------------------------------------------
             -- LOAD
-            ------------------------------------------------------------------
             when LOAD =>
                 -- Move input data to internal registers
                 next_internal_in_dataa <= in_dataa;
@@ -285,9 +269,7 @@ begin
                 -- Next, we want to do the multiplications
                 next_state <= START_MULS;
 
-            ------------------------------------------------------------------
             -- START_MULS
-            ------------------------------------------------------------------
             when START_MULS =>
                 -- Fire off both multiplications in parallel
                 next_start_mul      <= '1';
@@ -297,9 +279,7 @@ begin
                 -- Move to wait for them to finish
                 next_state <= WAIT_MULS;
 
-            ------------------------------------------------------------------
             -- WAIT_MULS
-            ------------------------------------------------------------------
             when WAIT_MULS =>
 					 next_start_add <= '0';
 					 next_start_mul      <= '0';
@@ -314,17 +294,13 @@ begin
                     next_state <= WAIT_MULS;
                 end if;
 
-            ------------------------------------------------------------------
             -- START_ADD
-            ------------------------------------------------------------------
             when START_ADD =>
                 -- Fire off the addition
                 next_start_add <= '1';
                 next_state     <= WAIT_ADD;
 
-            ------------------------------------------------------------------
             -- WAIT_ADD
-            ------------------------------------------------------------------
             when WAIT_ADD =>
 					next_start_add <= '0';
 					 next_start_mul      <= '0';
@@ -340,9 +316,7 @@ begin
                     next_state <= WAIT_ADD;
                 end if;
 
-            ------------------------------------------------------------------
             -- COMPUTE_DONE
-            ------------------------------------------------------------------
             when COMPUTE_DONE =>
                 -- Possibly remain here or go back to IDLE automatically
 					 next_to_idle_add		 <= '1';
@@ -363,8 +337,7 @@ begin
         end case;
     end process;
 
-    --------------------------------------------------------------------------
-    -- 4) External Outputs
+    -- External Outputs
     --------------------------------------------------------------------------
     done   <= internal_done;
     result <= internal_result;
