@@ -1,9 +1,0 @@
-	component config_pll is
-		port (
-			refclk   : in  std_log?c := 'X'; -- clk
-			rst      : in  std_log?c := 'X'; -- reset
-			outclk_0 : out std_log?c;        -- clk
-			locked   : out std_log?c         -- export
-		);
-	end component config_pll;
-
