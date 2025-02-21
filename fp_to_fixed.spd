@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<simPackage>
+ <file path="fp_to_fixed_sim/dspba_library_package.vhd" type="VHDL" />
+ <file path="fp_to_fixed_sim/dspba_library.vhd" type="VHDL" />
+ <file path="fp_to_fixed_sim/fp_to_fixed.vhd" type="VHDL" />
+ <topLevel name="fp_to_fixed" />
+ <deviceFamily name="cyclonev" />
+</simPackage>

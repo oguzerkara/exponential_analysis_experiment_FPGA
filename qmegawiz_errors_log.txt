@@ -1,0 +1,21 @@
+
+
+/Desktop/Project Stock Market Analyzer/fp_to_fixed.vhd
+
+Jan 24 10AM:36:26>: Megafunction FP_FUNCTIONS Intel FPGA IP v22.1 is not listed in any 
+wizard.lst file in the specified library path(s).Wizard launch aborted
+
+/Desktop/Project Stock Market Analyzer/fp_to_fixed.vhd
+
+Jan 24 10AM:36:30>: Megafunction FP_FUNCTIONS Intel FPGA IP v22.1 is not listed in any 
+wizard.lst file in the specified library path(s).Wizard launch aborted
+
+/Desktop/Project Stock Market Analyzer/config_fp_to_fixed.vhd
+
+Jan 24 11AM:32:09>: Megafunction FP_FUNCTIONS Intel FPGA IP v22.1 is not listed in any 
+wizard.lst file in the specified library path(s).Wizard launch aborted
+
+/Desktop/Project Stock Market Analyzer/config_fp_to_fixed.vhd
+
+Jan 24 11AM:32:14>: Megafunction FP_FUNCTIONS Intel FPGA IP v22.1 is not listed in any 
+wizard.lst file in the specified library path(s).Wizard launch aborted

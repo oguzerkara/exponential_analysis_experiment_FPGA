@@ -1,0 +1,108 @@
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.NUMERIC_STD.ALL;
+
+library work;
+use work.pkg_7seg_encode.all;  -- For DIGIT_LUT, seg_for_DASH, etc.
+
+package pkg_digit_extract is
+
+  -- Return the 3 digits (hundreds, tens, ones) for a signed integer [-999..+999].
+  function extract_3digit_integer(x : signed(15 downto 0)) return t_digit_array;
+
+  -- Return the 3 fraction digits for a 16-bit fraction (.ffff).
+  function extract_3digit_fraction(x : unsigned(15 downto 0)) return t_digit_array;
+
+end package pkg_digit_extract;
+
+
+package body pkg_digit_extract is
+
+  ----------------------------------------------------------------------------
+  -- 1) Extract integer digits without using '/' or 'mod'
+  ----------------------------------------------------------------------------
+  function extract_3digit_integer(x : signed(15 downto 0)) return t_digit_array is
+    variable d_array      : t_digit_array := (others => seg_blank);
+    variable tmp          : integer := to_integer(x);
+    variable negative     : boolean := false;
+    variable hundreds_val : integer := 0;   -- how many times we subtract 100
+    variable tens_val     : integer := 0;   -- how many times we subtract 10
+  begin
+    --------------------------------------------------------------------------
+    --  a) Saturate to ±999
+    --------------------------------------------------------------------------
+    if tmp > 999 then
+      tmp := 999;
+    elsif tmp < -999 then
+      tmp := -999;
+    end if;
+
+    --------------------------------------------------------------------------
+    --  b) Record sign, then make it positive
+    --------------------------------------------------------------------------
+    if tmp < 0 then
+      negative := true;
+      tmp := -tmp;  -- now tmp is positive
+    end if;
+
+    --------------------------------------------------------------------------
+    --  c) Extract hundreds by repeated subtract (avoid /, mod)
+    --------------------------------------------------------------------------
+    --   For up to 9 times, subtract 100 if possible
+    for i in 1 to 9 loop
+      if tmp >= 100 then
+        tmp := tmp - 100;
+        hundreds_val := hundreds_val + 1;
+      end if;
+    end loop;
+
+    -- If negative, show a dash in the 'hundreds' digit.
+    if negative = true then
+      d_array(5) := seg_for_DASH;  -- sign in leftmost digit
+    else
+      d_array(5) := DIGIT_LUT(hundreds_val);  -- normal digit
+    end if;
+
+    --------------------------------------------------------------------------
+    --  d) Extract tens
+    --------------------------------------------------------------------------
+    for i in 1 to 9 loop
+      if tmp >= 10 then
+        tmp := tmp - 10;
+        tens_val := tens_val + 1;
+      end if;
+    end loop;
+    d_array(4) := DIGIT_LUT(tens_val);
+
+    --------------------------------------------------------------------------
+    --  e) The remainder is the ones digit
+    --------------------------------------------------------------------------
+    d_array(3) := DIGIT_LUT(tmp);
+
+    return d_array;
+  end function;
+
+
+  ----------------------------------------------------------------------------
+  -- 2) Extract 3 fraction digits from a 16-bit fraction
+  ----------------------------------------------------------------------------
+  function extract_3digit_fraction(x : unsigned(15 downto 0)) return t_digit_array is
+    variable d_array   : t_digit_array := (others => seg_blank);
+    variable tmp32     : unsigned(31 downto 0) := (others => '0');
+    variable digit_val : integer;
+  begin
+    -- Place fraction bits in the lower half of 32 bits
+    tmp32(15 downto 0) := x;
+
+    -- Repeat 3 times: multiply by 10, top bits => decimal digit
+    for i in 2 downto 0 loop  -- i = 2..1..0
+      tmp32      := resize(tmp32 * 10, 32);            -- multiply by 10
+      digit_val  := to_integer(tmp32(31 downto 16));   -- top 16 bits
+      tmp32(31 downto 16) := (others => '0');          -- clear them out
+      d_array(i) := DIGIT_LUT(digit_val);
+    end loop;
+
+    return d_array;
+  end function;
+
+end package body pkg_digit_extract;
