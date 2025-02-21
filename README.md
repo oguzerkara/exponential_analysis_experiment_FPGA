@@ -38,4 +38,4 @@ This project implements **real-time stock market data processing** using the **D
 - **Correct Display Outputs**: FPGA results matched simulation expectations.
 - **Stable Performance**: Verified operation at **50 MHz clock frequency**.
 
-
+**Outcomes** can be checked at: https://github.com/oguzerkara/exponential_analysis_experiment_FPGA/wiki/Results
